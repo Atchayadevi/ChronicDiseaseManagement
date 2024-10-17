@@ -36,6 +36,9 @@ mongoose
     console.log("Error connecting to MongoDb", err);
   });
 
+app.get("/",(req,res) =>{
+  res.json("Hello");
+})
 const bookSchema = new mongoose.Schema({
   bookTitle: {
     type: String,
