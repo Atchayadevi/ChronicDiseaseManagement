@@ -7,20 +7,10 @@ const nodemailer = require("nodemailer");
 const app = express();
 const port = 8000;
 const cors = require("cors");
-// app.use(
-//   cors({
-<<<<<<< HEAD
-//     origin: ["https://books-rho-black.vercel.app/"],
-=======
-//     origin: ["https://books-rho-black.vercel.app"],
->>>>>>> 28409d61e4df9d40e134adb308260e6719acfd8d
-//     methods: ["POST", "GET"],
-//     credentials: true,
-//   })
-// );
+const cors = require("cors");
+app.use(cors({ origin: "https://books-client-iaft.onrender.com" })); // Allow only your frontend
 
-
-app.use(express.json())
+app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -42,9 +32,9 @@ mongoose
     console.log("Error connecting to MongoDb", err);
   });
 
-app.get("/",(req,res) =>{
+app.get("/", (req, res) => {
   res.json("Hello");
-})
+});
 const bookSchema = new mongoose.Schema({
   bookTitle: {
     type: String,
