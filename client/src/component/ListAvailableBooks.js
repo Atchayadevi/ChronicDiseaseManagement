@@ -19,7 +19,7 @@ function ListAvailableBooks() {
   // Fetch books from the backend
   useEffect(() => {
     axios
-      .get("https://books-api-nu.vercel.app/getbooks")
+      .get("http://localhost:8000/getbooks")
       .then((response) => {
         setBooks(response.data);
       })
