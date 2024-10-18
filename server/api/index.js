@@ -9,12 +9,18 @@ const port = 8000;
 const cors = require("cors");
 // app.use(
 //   cors({
+<<<<<<< HEAD
 //     origin: ["https://books-rho-black.vercel.app/"],
+=======
+//     origin: ["https://books-rho-black.vercel.app"],
+>>>>>>> 28409d61e4df9d40e134adb308260e6719acfd8d
 //     methods: ["POST", "GET"],
 //     credentials: true,
 //   })
 // );
 
+
+app.use(express.json())
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -36,6 +42,9 @@ mongoose
     console.log("Error connecting to MongoDb", err);
   });
 
+app.get("/",(req,res) =>{
+  res.json("Hello");
+})
 const bookSchema = new mongoose.Schema({
   bookTitle: {
     type: String,
