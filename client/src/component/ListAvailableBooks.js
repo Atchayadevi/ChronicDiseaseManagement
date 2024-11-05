@@ -4,6 +4,7 @@ import SemesterDropDown from "../DropDown/SemesterDropDown";
 import DepartmentDropDown from "../DropDown/DepartmentDropDown";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function ListAvailableBooks() {
@@ -11,7 +12,7 @@ function ListAvailableBooks() {
   const Regulation = useSelector((state) => state.Regulation);
   const sem = useSelector((state) => state.Sem);
   const Dep = useSelector((state) => state.Dep);
-
+  const navigate = useNavigate();
   const [books, setBooks] = useState([]);
   const [filteredBooks, setFilteredBooks] = useState([]);
   const [contactDetails, setContactDetails] = useState({});
@@ -19,7 +20,7 @@ function ListAvailableBooks() {
   // Fetch books from the backend
   useEffect(() => {
     axios
-      .get("https://books-cfj1.onrender.com/getbooks")
+      .get("http://localhost:8000/getbooks")
       .then((response) => {
         setBooks(response.data);
       })
@@ -65,7 +66,7 @@ function ListAvailableBooks() {
 
       // Send data to backend to store in DB
       axios
-        .post("https://books-cfj1.onrender.com/availableBooks", bookDetails)
+        .post("https://books-cfj1.onrender.com/availableBooks", bookDetails) //https://books-cfj1.onrender.com   "http://localhost:8000/"
         .then((response) => {
           alert(response.data); // Show success or failure message
           setContactDetails((prev) => ({
@@ -87,6 +88,16 @@ function ListAvailableBooks() {
 
   return (
     <>
+      <div className="flex items-center justify-center p-2 bg-gradient-to-r bg-[#25154d]">
+        <img
+          src="/logo.jpeg" // Assuming the logo is placed in the public/images directory
+          alt="BookBuddy Logo"
+          className="h-16 w-16 mr-4" // Adjust the size as needed
+        />
+        <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-4xl text-white  p-6 text-center">
+          Jacsice BookBuddy Network
+        </h1>
+      </div>
       <div>
         {" "}
         <RegulationDropDown />
@@ -104,13 +115,14 @@ function ListAvailableBooks() {
         {" "}
         <DepartmentDropDown />
       </div>
-
-      <ul>
-        <li>{year}</li>
-        <li>{Regulation}</li>
-        <li>{sem}</li>
-        <li>{Dep}</li>
-      </ul>
+      <div className="flex justify-center items-center ">
+        <button
+          onClick={() => navigate("/addotherbooks")}
+          className="bg-blue-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300"
+        >
+          other books? Add here
+        </button>
+      </div>
 
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white">

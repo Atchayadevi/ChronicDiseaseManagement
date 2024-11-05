@@ -8,7 +8,8 @@ const app = express();
 const port = 8000;
 const cors = require("cors");
 // const cors = require("cors");
-app.use(cors({ origin: "https://books-client-iaft.onrender.com" })); // Allow only your frontend
+// app.use(cors({ origin: "https://books-client-iaft.onrender.com" })); // Allow only your frontend  // https://books-client-iaft.onrender.com
+app.use(cors());
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -54,6 +55,61 @@ const bookSchema = new mongoose.Schema({
 });
 
 const collection = new mongoose.model("books", bookSchema);
+
+const availableSchema = new mongoose.Schema({
+  title: { type: String, required: true, unique: true },
+  available: { type: String, required: true },
+  contact: { type: String, required: true },
+});
+
+const availableCollection = mongoose.model("available", availableSchema);
+
+module.exports = { availableCollection };
+
+// User Login
+app.post("/otherbooks", async (req, res) => {
+  const { title, available, contact } = req.body;
+
+  try {
+    // Find the user by username
+    const newEntry = new availableCollection({
+      title,
+      available,
+      contact,
+    });
+
+    // Save the entry to the database
+    await newEntry.save();
+
+    // Return a success response
+    res.status(201).json({ message: "Book details added successfully" });
+  } catch (error) {
+    console.error(error); // Log the error for debugging
+    if (error.code === 11000) {
+      // Check for duplicate title
+      res.status(400).json({ message: "Book title already exists" });
+    } else {
+      res.status(500).json({ message: "Error adding book details" });
+    }
+  }
+});
+
+app.get("/otherbooks", async (req, res) => {
+  try {
+    // Fetch all available books from the database
+    const availableBooksname = await availableCollection.find({});
+    console.log("Fetched books:", availableBooksname); // Log fetched data
+
+    if (availableBooksname.length === 0) {
+      return res.status(404).json({ message: "No available books found." });
+    }
+    // Send the fetched data as a response
+    res.status(200).json(availableBooksname);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching available books" });
+  }
+});
 
 const availabilityBookSchema = new mongoose.Schema({
   bookTitle: String,

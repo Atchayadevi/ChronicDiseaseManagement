@@ -1,7 +1,7 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "",
+  "description": "��#\u0000 \u0000b\u0000o\u0000o\u0000k\u0000_\u0000e\u0000x\u0000c\u0000h\u0000a\u0000n\u0000g\u0000e\u0000_\u0000s\u0000y\u0000s\u0000t\u0000e\u0000m\u0000\r\u0000 \u0000",
   "main": "index.js",
   "scripts": {
     "start": "node api/index.js",
@@ -17,5 +17,6 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.7.1",
     "nodemailer": "^6.9.15"
-  }
+  },
+  "devDependencies": {}
 }
