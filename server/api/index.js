@@ -241,6 +241,12 @@ app.post("/juniordetails", async (req, res) => {
   }
 
   try {
+    const existingUser = await juniorCollection.findOne({ mailId });
+
+    if (!existingUser) {
+      return res.status(400).json({ message: "Email not registered" });
+    }
+    console.log("existing user", existingUser);
     const newUser = new juniorCollection({ name, mailId, collegeId, contact });
     await newUser.save();
     res.status(201).json({ message: "Registered successfully" });
@@ -253,23 +259,20 @@ app.post("/juniordetails", async (req, res) => {
 });
 
 app.post("/juniorlogin", async (req, res) => {
-  console.log("Request received with body:", req.body);
   const { mailId } = req.body;
 
-  // Check if mailId is provided
   if (!mailId) {
     return res.status(400).json({ message: "Email is required" });
   }
 
   try {
-    console.log(mailId);
-    // Check if the mailId exists in the database
     const existingUser = await juniorCollection.findOne({ mailId });
 
     if (!existingUser) {
       return res.status(400).json({ message: "Email not registered" });
     }
-
+    console.log("existing user junior", existingUser);
+    // Generate a JWT token
     const token = jwt.sign({ userId: existingUser._id }, SECRET_KEY, {
       expiresIn: "1h",
     });
@@ -277,7 +280,10 @@ app.post("/juniorlogin", async (req, res) => {
     res.status(200).json({
       message: "Login successful",
       token,
-      user: { mailId: existingUser.mailId, name: existingUser.name },
+      user: {
+        mailId: existingUser.mailId,
+        name: existingUser.name,
+      },
     });
   } catch (error) {
     console.error("Error during login:", error);

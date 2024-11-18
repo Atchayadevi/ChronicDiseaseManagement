@@ -83,6 +83,19 @@ const JuniorLogin = () => {
             </div>
             {error && <p style={{ color: "red" }}>{error}</p>}
             {message && <p style={{ color: "green" }}>{message}</p>}
+            <h1 className=" mt-3 flex items-center justify-center">
+              New user?
+              <button
+                className="bg-green-900  hover:bg-green-800 text-white font-bold py-0 px-1 rounded"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate("/junior_registration");
+                }}
+              >
+                Register
+              </button>{" "}
+              to continue
+            </h1>
           </form>
         </div>
       </div>
