@@ -22,7 +22,7 @@ function ListAvailableBooks() {
   // Fetch books from the backend
   useEffect(() => {
     axios
-      .get("http://localhost:8000/getbooks")
+      .get("https://books-serverside.onrender.com/getbooks")
       .then((response) => {
         setBooks(response.data);
       })
@@ -57,11 +57,14 @@ function ListAvailableBooks() {
       try {
         const token = localStorage.getItem("token"); // Retrieve token from localStorage
 
-        const response = await axios.get("http://localhost:8000/user-details", {
-          headers: {
-            Authorization: `Bearer ${token}`, // Include token in the request
-          },
-        });
+        const response = await axios.get(
+          "https://books-serverside.onrender.com/user-details",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Include token in the request
+            },
+          }
+        );
 
         setUser(response.data.user); // Save user details
       } catch (err) {
@@ -100,7 +103,7 @@ function ListAvailableBooks() {
       try {
         // Send data to backend to store in DB
         const response = await axios.post(
-          "http://localhost:8000/availableBooks",
+          "https://books-serverside.onrender.com/availableBooks",
           bookDetails
         );
 

@@ -13,11 +13,14 @@ const AddotherBooks = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8000/otherbooks", {
-        title,
-        available,
-        contact,
-      });
+      const response = await axios.post(
+        "https://books-serverside.onrender.com/otherbooks",
+        {
+          title,
+          available,
+          contact,
+        }
+      );
 
       setMessage(response.data.message);
       setMessageColor("green"); // Success message in green

@@ -14,12 +14,15 @@ const JuniorRegistration = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8000/juniordetails", {
-        name,
-        mailId,
-        collegeId,
-        contact,
-      });
+      const response = await axios.post(
+        "https://books-serverside.onrender.com/juniordetails",
+        {
+          name,
+          mailId,
+          collegeId,
+          contact,
+        }
+      );
 
       setMessage(response.data.message);
       setMessageColor("green"); // Success message in green

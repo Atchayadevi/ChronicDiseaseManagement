@@ -27,7 +27,7 @@ function BookAvailableSeniorList() {
         const token = localStorage.getItem("token"); // Retrieve token from localStorage
 
         const response = await axios.get(
-          "http://localhost:8000/junior-details",
+          "https://books-serverside.onrender.com/junior-details",
           {
             headers: {
               Authorization: `Bearer ${token}`, // Include token in the request
@@ -48,7 +48,7 @@ function BookAvailableSeniorList() {
     const fetchBooks = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:8000/availableBooks"
+          "https://books-serverside.onrender.com/availableBooks"
         );
         setAvailableBooks(response.data);
       } catch (error) {
@@ -65,7 +65,9 @@ function BookAvailableSeniorList() {
   const fetchOtherBooks = async () => {
     setLoadingOther(true); // Set loading state
     try {
-      const response = await axios.get("http://localhost:8000/otherbooks");
+      const response = await axios.get(
+        "https://books-serverside.onrender.com/otherbooks"
+      );
       setOtherAvailableBooks(response.data);
     } catch (error) {
       console.error("Error fetching other available books:", error);

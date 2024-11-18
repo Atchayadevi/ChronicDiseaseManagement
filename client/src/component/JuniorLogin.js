@@ -16,9 +16,12 @@ const JuniorLogin = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:8000/juniorlogin", {
-        mailId,
-      });
+      const response = await axios.post(
+        "https://books-serverside.onrender.com/juniorlogin",
+        {
+          mailId,
+        }
+      );
       console.log("Sending mailId:", mailId); // Log mailId to ensure it's correct
       const { token, user } = response.data;
       console.log("User Logged In:", user);
