@@ -25,7 +25,7 @@ const Login = () => {
     <>
       <div className="flex items-center justify-center p-4 bg-gradient-to-r bg-[#25154d]">
         <img
-          src="/logo.jpeg" // Assuming the logo is placed in the public/images directory
+          src="/logo.jpeg" 
           alt="BookBuddy Logo"
           className="h-16 w-16 mr-4"
         />
@@ -77,7 +77,7 @@ const Login = () => {
                 Login
               </button>
             </div>
-            {/* You can use a message display if needed */}
+          
           </form>
         </div>
       </div>
