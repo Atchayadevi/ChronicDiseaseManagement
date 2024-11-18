@@ -38,7 +38,7 @@ const JuniorLogin = () => {
         navigate("/bookavailable");
       }, 1000);
     } catch (err) {
-      setMessage(err.response?.data?.message || "something went wrong");
+      setError(err.response?.data?.message || "something went wrong");
       setMessage("");
     }
   };
