@@ -1,24 +1,43 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const Login = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-
+const SeniorLogin = () => {
+  const [mailId, setMailId] = useState("");
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (username === "JACSICE" && password === "JACSICE") {
-      alert("Login successful");
-      setTimeout(() => {
-        navigate("/mainpage");
-      }, 1000);
-    } else {
-      alert("Wrong username and password");
+    if (!mailId) {
+      setError("Email is required");
+      return;
     }
-    setUsername("");
-    setPassword("");
+
+    try {
+      const response = await axios.post("http://localhost:8000/login", {
+        mailId,
+      });
+
+      const { token, user } = response.data;
+      console.log("User Logged In:", user);
+
+      // Save token and user details to localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      setMessage(response.data.message);
+      setError("");
+      setMailId("");
+
+      setTimeout(() => {
+        navigate("/listavailablebooks");
+      }, 1000);
+    } catch (err) {
+      setError(err.response?.data?.message || "Something went wrong");
+      setMessage("");
+    }
   };
 
   return (
@@ -40,35 +59,20 @@ const Login = () => {
             <div className="mb-4">
               <label
                 className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="username"
+                htmlFor="mailId"
               >
-                Username
+                Mail Id
               </label>
               <input
                 type="text"
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="mailId"
+                value={mailId}
+                onChange={(e) => setMailId(e.target.value)}
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
             </div>
-            <div className="mb-6">
-              <label
-                className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="password"
-              >
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
-            </div>
+
             <div className="flex items-center justify-between">
               <button
                 type="submit"
@@ -77,7 +81,8 @@ const Login = () => {
                 Login
               </button>
             </div>
-            {/* You can use a message display if needed */}
+            {error && <p style={{ color: "red" }}>{error}</p>}
+            {message && <p style={{ color: "green" }}>{message}</p>}
           </form>
         </div>
       </div>
@@ -85,4 +90,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default SeniorLogin;

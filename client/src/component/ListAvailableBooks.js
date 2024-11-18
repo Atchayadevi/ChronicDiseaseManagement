@@ -1,21 +1,23 @@
-import YearDropDown from "../DropDown/YearDropDown";
-import RegulationDropDown from "../DropDown/RegulationDropDown";
-import SemesterDropDown from "../DropDown/SemesterDropDown";
-import DepartmentDropDown from "../DropDown/DepartmentDropDown";
-import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function ListAvailableBooks() {
-  const year = useSelector((state) => state.year);
-  const Regulation = useSelector((state) => state.Regulation);
-  const sem = useSelector((state) => state.Sem);
-  const Dep = useSelector((state) => state.Dep);
   const navigate = useNavigate();
   const [books, setBooks] = useState([]);
   const [filteredBooks, setFilteredBooks] = useState([]);
   const [contactDetails, setContactDetails] = useState({});
+
+  const [selectedRegulation, setSelectedRegulation] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedSemester, setSelectedSemester] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
+
+  const [bookname, setbookname] = useState("");
+
+  const [error, setError] = useState("");
+
+  const user = JSON.parse(localStorage.getItem("user"));
 
   // Fetch books from the backend
   useEffect(() => {
@@ -31,14 +33,44 @@ function ListAvailableBooks() {
   useEffect(() => {
     const filtered = books.filter((book) => {
       return (
-        (year === "" || year === book.Year) &&
-        (Regulation === "" || Regulation === book.Regulation) &&
-        (sem === "" || sem === book.semester) &&
-        (Dep === "" || Dep === book.department)
+        (selectedYear === "" || selectedYear === book.Year) &&
+        (selectedRegulation === "" || selectedRegulation === book.Regulation) &&
+        (selectedSemester === "" || selectedSemester === book.semester) &&
+        (selectedDepartment === "" || selectedDepartment === book.department) &&
+        (bookname === "" ||
+          (book.bookTitle &&
+            book.bookTitle.toLowerCase().includes(bookname.toLowerCase())))
       );
     });
     setFilteredBooks(filtered);
-  }, [books, year, Regulation, sem, Dep]);
+  }, [
+    books,
+    selectedYear,
+    selectedRegulation,
+    selectedSemester,
+    selectedDepartment,
+    bookname,
+  ]);
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const token = localStorage.getItem("token"); // Retrieve token from localStorage
+
+        const response = await axios.get("http://localhost:8000/user-details", {
+          headers: {
+            Authorization: `Bearer ${token}`, // Include token in the request
+          },
+        });
+
+        setUser(response.data.user); // Save user details
+      } catch (err) {
+        setError(err.response?.data?.message || "Failed to fetch user details");
+      }
+    };
+
+    fetchUserDetails();
+  }, []);
 
   // Handle contact input for each book separately
   const handleContactChange = (event, index) => {
@@ -54,7 +86,7 @@ function ListAvailableBooks() {
 
   // Handle book availability activation
   // Handle book availability activation
-  const handleActivate = (book, index) => {
+  const handleActivate = async (book, index) => {
     const contact = contactDetails[index] || "";
 
     if (contact.length === 10) {
@@ -62,25 +94,32 @@ function ListAvailableBooks() {
         ...book,
         contact,
         isAvailable: true,
+        userId: user.userId,
       };
 
-      // Send data to backend to store in DB
-      axios
-        .post("https://books-cfj1.onrender.com/availableBooks", bookDetails) //https://books-cfj1.onrender.com   "http://localhost:8000/"
-        .then((response) => {
-          alert(response.data); // Show success or failure message
-          setContactDetails((prev) => ({
-            ...prev,
-            [index]: "",
-          }));
-        })
-        .catch((err) => {
-          if (err.response && err.response.status === 409) {
-            alert("You have already added the book details."); // Alert if book details exist
-          } else {
-            console.error(err);
-          }
-        });
+      try {
+        // Send data to backend to store in DB
+        const response = await axios.post(
+          "http://localhost:8000/availableBooks",
+          bookDetails
+        );
+
+        alert(response.data); // Show success or failure message
+
+        // Clear the contact detail after successful submission
+        setContactDetails((prev) => ({
+          ...prev,
+          [index]: "",
+        }));
+      } catch (err) {
+        // Handle error
+        if (err.response && err.response.status === 409) {
+          alert("You have already added the book details."); // Alert if book details exist
+        } else {
+          console.error("Error:", err);
+          console.log("Book Details:", bookDetails);
+        }
+      }
     } else {
       alert("Please enter a valid 10-digit contact number.");
     }
@@ -88,32 +127,145 @@ function ListAvailableBooks() {
 
   return (
     <>
-      <div className="flex items-center justify-center p-2 bg-gradient-to-r bg-[#25154d]">
-        <img
-          src="/logo.jpeg" // Assuming the logo is placed in the public/images directory
-          alt="BookBuddy Logo"
-          className="h-16 w-16 mr-4" // Adjust the size as needed
-        />
-        <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-4xl text-white  p-6 text-center">
-          Jacsice BookBuddy Network
-        </h1>
-      </div>
-      <div>
-        {" "}
-        <RegulationDropDown />
+      <div className="bg-gradient-to-r bg-[#25154d] p-4">
+        {/* Navbar container */}
+        <div className="flex items-center justify-between flex-wrap space-y-4 md:space-y-0 md:flex-nowrap">
+          {/* Left side: User info */}
+          <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4 text-white">
+            {user ? (
+              <div className="flex flex-col items-center md:items-start">
+                <h1 className="text-lg md:text-xl font-semibold">
+                  Welcome, {user.name || user.mailId}
+                </h1>
+                <p className="text-sm">{user.mailId}</p>
+              </div>
+            ) : (
+              <p className="text-sm">Loading...</p>
+            )}
+          </div>
+
+          {/* Center: Logo and Title */}
+          <div className="flex items-center justify-center space-x-4">
+            <img
+              src="/logo.jpeg"
+              alt="BookBuddy Logo"
+              className="h-16 w-16 md:h-20 md:w-20 rounded-full"
+            />
+            <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-4xl text-white font-bold p-2 text-center">
+              Jacsice BookNest
+            </h1>
+          </div>
+
+          {/* Right side: Button */}
+          <div className="flex items-center justify-center">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                navigate("/seniorsite");
+              }}
+              className="bg-white text-[#25154d] py-2 px-4 rounded-lg font-medium hover:bg-lime-500 hover:text-white transition duration-200"
+            >
+              Your site
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div>
-        {" "}
-        <YearDropDown />
-      </div>
-      <div>
-        {" "}
-        <SemesterDropDown />
-      </div>
-      <div>
-        {" "}
-        <DepartmentDropDown />
+      <div className="space-y-4 p-6 bg-gray-300 rounded m-2 mx-auto w-full lg:w-2/3">
+        <div className="flex flex-col lg:flex-row lg:items-center space-y-2 lg:space-y-0 lg:space-x-4 w-full ">
+          <label className="text-2xl font-bold text-black lg:w-1/4">
+            Filter by book name
+          </label>
+          <input
+            type="text"
+            value={bookname}
+            onChange={(e) => setbookname(e.target.value)}
+            placeholder="Enter book name"
+            className="  lg:w-2/5  px-3 py-2 border rounded-md  focus:ring-blue-500 focus:border-blue-500 focus:outline-none focus:ring-2  block w-full sm:text-sm border-black"
+          />
+        </div>
+        {/* Regulation Dropdown */}
+        <div className="flex flex-col lg:flex-row lg:items-center space-y-2 lg:space-y-0 lg:space-x-4 w-full">
+          <label className="text-2xl font-bold text-black lg:w-1/4">
+            Regulation
+          </label>
+          <select
+            value={selectedRegulation}
+            onChange={(e) => setSelectedRegulation(e.target.value)}
+            className="w-full lg:w-2/5 px-3 py-2 bg-white border border-black rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="" disabled>
+              Select a Regulation
+            </option>
+            <option value="2017">2017</option>
+            <option value="2021">2021</option>
+          </select>
+        </div>
+
+        {/* Department Dropdown */}
+        <div className="flex flex-col lg:flex-row lg:items-center space-y-2 lg:space-y-0 lg:space-x-4 w-full">
+          <label className="text-2xl font-bold text-black lg:w-1/4">
+            Department
+          </label>
+          <select
+            value={selectedDepartment}
+            onChange={(e) => setSelectedDepartment(e.target.value)}
+            className="w-full lg:w-2/5 px-3 py-2 bg-white border border-black rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="" disabled>
+              Select a Department
+            </option>
+            <option value="CSE">CSE</option>
+            <option value="IT">IT</option>
+            <option value="ECE">ECE</option>
+            <option value="EEE">EEE</option>
+            <option value="Mechanical">Mechanical</option>
+            <option value="CIVIL">CIVIL</option>
+            <option value="AI & DS">AI & DS</option>
+          </select>
+        </div>
+
+        {/* Semester Dropdown */}
+        <div className="flex flex-col lg:flex-row lg:items-center space-y-2 lg:space-y-0 lg:space-x-4 w-full">
+          <label className="text-2xl font-bold text-black lg:w-1/4">
+            Semester
+          </label>
+          <select
+            value={selectedSemester}
+            onChange={(e) => setSelectedSemester(e.target.value)}
+            className="w-full lg:w-2/5 px-3 py-2 bg-white border border-black rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="" disabled>
+              Select a Semester
+            </option>
+            <option value="I sem">I sem</option>
+            <option value="II sem">II sem</option>
+            <option value="III sem">III sem</option>
+            <option value="IV sem">IV sem</option>
+            <option value="V sem">V sem</option>
+            <option value="VI sem">VI sem</option>
+            <option value="VII sem">VII sem</option>
+            <option value="VIII sem">VIII sem</option>
+          </select>
+        </div>
+
+        {/* Year Dropdown */}
+        <div className="flex flex-col lg:flex-row lg:items-center space-y-2 lg:space-y-0 lg:space-x-4 w-full">
+          <label className="text-2xl font-bold text-black lg:w-1/4">Year</label>
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+            className="w-full lg:w-2/5 px-3 py-2 bg-white border border-black rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="" disabled>
+              Select a Year
+            </option>
+            <option value="I Year">I Year</option>
+            <option value="II Year">II Year</option>
+            <option value="III Year">III Year</option>
+            <option value="IV Year">IV Year</option>
+          </select>
+        </div>
       </div>
       <div className="flex justify-center items-center ">
         <button

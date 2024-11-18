@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const AddotherBooks = () => {
-  const [title, setTitle] = useState("");
-  const [available, setAvailable] = useState("");
+const JuniorRegistration = () => {
+  const [name, setName] = useState("");
+  const [mailId, setMailId] = useState("");
+  const [collegeId, setCollegeId] = useState("");
   const [contact, setcontact] = useState("");
   const [message, setMessage] = useState("");
   const [messageColor, setMessageColor] = useState("");
@@ -13,17 +14,19 @@ const AddotherBooks = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8000/otherbooks", {
-        title,
-        available,
+      const response = await axios.post("http://localhost:8000/juniordetails", {
+        name,
+        mailId,
+        collegeId,
         contact,
       });
 
       setMessage(response.data.message);
       setMessageColor("green"); // Success message in green
-      setTitle("");
-      setAvailable("");
-      setcontact("");
+      setName("");
+      setMailId("");
+      setCollegeId("");
+      setcontact(" ");
 
       // Uncomment to navigate after submission
       // setTimeout(() => {
@@ -59,15 +62,31 @@ const AddotherBooks = () => {
             <div className="mb-4">
               <label
                 className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="title"
+                htmlFor="name"
               >
-                Title
+                Name
               </label>
               <input
                 type="text"
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                className="block text-gray-700 text-sm font-bold mb-2"
+                htmlFor="mailId"
+              >
+                Mail Id
+              </label>
+              <input
+                type="text"
+                id="mailId"
+                value={mailId}
+                onChange={(e) => setMailId(e.target.value)}
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
@@ -76,15 +95,15 @@ const AddotherBooks = () => {
             <div className="mb-4">
               <label
                 className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="available"
+                htmlFor="collegeId"
               >
-                Availability
+                College ID/Company name(if alumni)
               </label>
               <input
                 type="text"
-                id="available"
-                value={available}
-                onChange={(e) => setAvailable(e.target.value)}
+                id="collegeId"
+                value={collegeId}
+                onChange={(e) => setCollegeId(e.target.value)}
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
@@ -112,7 +131,7 @@ const AddotherBooks = () => {
                 type="submit"
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 w-full"
               >
-                Add Book
+                Register
               </button>
             </div>
 
@@ -121,6 +140,20 @@ const AddotherBooks = () => {
                 {message}
               </h1>
             )}
+
+            <h1 className=" mt-3 flex items-center justify-center">
+              Already have an account?
+              <button
+                className="bg-green-900  hover:bg-green-800 text-white font-bold py-0 px-1 rounded"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate("/juniorLogin");
+                }}
+              >
+                login
+              </button>{" "}
+              to continue
+            </h1>
           </form>
         </div>
       </div>
@@ -128,4 +161,4 @@ const AddotherBooks = () => {
   );
 };
 
-export default AddotherBooks;
+export default JuniorRegistration;

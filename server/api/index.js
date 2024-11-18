@@ -3,6 +3,8 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
+const jwt = require("jsonwebtoken");
+const SECRET_KEY = "Muthu@97$"; // Use an environment variable in production
 
 const app = express();
 const port = 8000;
@@ -15,17 +17,19 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-const jwt = require("jsonwebtoken");
 const { type } = require("os");
+const { isModuleNamespaceObject } = require("util/types");
 app.listen(port, () => {
   console.log("Server is running on port 8000");
 });
 
 mongoose
-  .connect("mongodb+srv://muthuanushya:anushya@cluster0.2e7d5.mongodb.net/", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(
+    "mongodb+srv://muthuanushya:anushya@cluster0.2e7d5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+    {
+      connectTimeoutMS: 30000, // Optional: increase timeout
+    }
+  )
   .then(() => {
     console.log("Connected to MongoDB");
   })
@@ -65,6 +69,51 @@ const availableSchema = new mongoose.Schema({
 const availableCollection = mongoose.model("available", availableSchema);
 
 module.exports = { availableCollection };
+
+const seniorschema = new mongoose.Schema({
+  name: { type: String, required: true, unique: true },
+  mailId: { type: String, required: true },
+  collegeId: { type: String, required: true },
+  contact: { type: String, required: true },
+
+  books: [
+    {
+      bookTitle: { type: String, required: true },
+      Year: { type: String, required: true },
+      Regulation: { type: String, required: true },
+      sem: { type: String, required: true },
+      dep: { type: String, required: true },
+      contact: { type: String, required: true },
+      userId: { type: mongoose.Schema.Types.ObjectId, ref: "seniordata" },
+    },
+  ],
+});
+
+const seniorCollection = mongoose.model("seniorData", seniorschema);
+
+module.exports = { seniorCollection };
+
+const juniorschema = new mongoose.Schema({
+  name: { type: String, required: true, unique: true },
+  mailId: { type: String, required: true },
+  collegeId: { type: String, required: true },
+  contact: { type: String, required: true },
+  books: [
+    {
+      bookTitle: { type: String, required: true },
+      Year: { type: String, required: true },
+      Regulation: { type: String, required: true },
+      sem: { type: String, required: true },
+      dep: { type: String, required: true },
+      contact: { type: String, required: true },
+      userId: { type: mongoose.Schema.Types.ObjectId, ref: "seniordata" },
+    },
+  ],
+});
+
+const juniorCollection = mongoose.model("juniorData", juniorschema);
+
+module.exports = { juniorCollection };
 
 // User Login
 app.post("/otherbooks", async (req, res) => {
@@ -111,6 +160,131 @@ app.get("/otherbooks", async (req, res) => {
   }
 });
 
+// for senior details
+
+app.post("/seniordetails", async (req, res) => {
+  const { name, mailId, collegeId, contact } = req.body;
+
+  // Check if required fields are provided
+  if (!name || !mailId || !collegeId || !contact) {
+    return res
+      .status(400)
+      .json({ message: "name, mailId, collegeId, and contact are required" });
+  }
+
+  try {
+    // Check if any of the provided identifiers (mailId, collegeId, or contact) already exist in the database
+    const existingUser = await seniorCollection.findOne({
+      $or: [{ mailId: mailId }, { collegeId: collegeId }, { contact: contact }],
+    });
+
+    if (existingUser) {
+      return res.status(400).json({
+        message:
+          "User already registered with this email, college ID, or contact number",
+      });
+    }
+
+    // If no existing user found, proceed with registration
+    const newUser = new seniorCollection({ name, mailId, collegeId, contact });
+    await newUser.save();
+
+    res.status(201).json({ message: "Registered successfully" });
+  } catch (error) {
+    // Handle other errors
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.post("/login", async (req, res) => {
+  const { mailId } = req.body;
+
+  if (!mailId) {
+    return res.status(400).json({ message: "Email is required" });
+  }
+
+  try {
+    const existingUser = await seniorCollection.findOne({ mailId });
+
+    if (!existingUser) {
+      return res.status(400).json({ message: "Email not registered" });
+    }
+    console.log("existing user", existingUser);
+    // Generate a JWT token
+    const token = jwt.sign({ userId: existingUser._id }, SECRET_KEY, {
+      expiresIn: "1h",
+    });
+
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user: {
+        userId: existingUser._id,
+        mailId: existingUser.mailId,
+        name: existingUser.name,
+        books: existingUser.books, // Include all books as an array
+      },
+    });
+  } catch (error) {
+    console.error("Error during login:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.post("/juniordetails", async (req, res) => {
+  const { name, mailId, collegeId, contact } = req.body;
+
+  if (!name || !mailId || !collegeId || !contact) {
+    return res
+      .status(400)
+      .json({ message: "name,collegeId and contact required" });
+  }
+
+  try {
+    const newUser = new juniorCollection({ name, mailId, collegeId, contact });
+    await newUser.save();
+    res.status(201).json({ message: "Registered successfully" });
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: "Username already exists" });
+    }
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.post("/juniorlogin", async (req, res) => {
+  console.log("Request received with body:", req.body);
+  const { mailId } = req.body;
+
+  // Check if mailId is provided
+  if (!mailId) {
+    return res.status(400).json({ message: "Email is required" });
+  }
+
+  try {
+    console.log(mailId);
+    // Check if the mailId exists in the database
+    const existingUser = await juniorCollection.findOne({ mailId });
+
+    if (!existingUser) {
+      return res.status(400).json({ message: "Email not registered" });
+    }
+
+    const token = jwt.sign({ userId: existingUser._id }, SECRET_KEY, {
+      expiresIn: "1h",
+    });
+
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user: { mailId: existingUser.mailId, name: existingUser.name },
+    });
+  } catch (error) {
+    console.error("Error during login:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 const availabilityBookSchema = new mongoose.Schema({
   bookTitle: String,
   Year: String,
@@ -119,32 +293,112 @@ const availabilityBookSchema = new mongoose.Schema({
   semester: String,
   contact: String,
   isAvailable: Boolean,
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "seniordata" },
 });
 const AvailableBook = mongoose.model("availableBooks", availabilityBookSchema);
 
+// Route to delete a book by ID
+app.delete("/books/:seniorId/:bookId", async (req, res) => {
+  const { seniorId, bookId } = req.params;
+
+  // Validate ObjectIds
+  if (
+    !mongoose.Types.ObjectId.isValid(seniorId) ||
+    !mongoose.Types.ObjectId.isValid(bookId)
+  ) {
+    return res.status(400).json({ message: "Invalid senior or book ID" });
+  }
+
+  try {
+    // Check if the senior exists
+    const senior = await seniorCollection.findById(seniorId);
+    if (!senior) {
+      return res.status(404).json({ message: "Senior not found" });
+    }
+
+    // Find the specific book in the senior's collection
+    const book = senior.books.find((book) => book._id.toString() === bookId);
+    if (!book) {
+      return res
+        .status(404)
+        .json({ message: "Book not found in senior's collection" });
+    }
+
+    // Pull the book from the senior's books array
+    await seniorCollection.findOneAndUpdate(
+      { _id: seniorId, "books._id": bookId },
+      { $pull: { books: { _id: bookId } } },
+      { new: true }
+    );
+
+    // Match the book in the availableBooks collection using multiple fields
+    const updatedBook = await AvailableBook.findOneAndUpdate(
+      {
+        bookTitle: book.bookTitle,
+        Year: book.Year, // Corrected to match the schema field name
+        Regulation: book.Regulation, // Corrected to match the schema field name
+        department: book.dep, // Corrected to match the schema field name
+        semester: book.sem, // Corrected to match the schema field name
+        contact: book.contact, // Corrected to match the schema field name
+      },
+      { $set: { isAvailable: false } },
+      { new: true }
+    );
+
+    if (!updatedBook) {
+      return res
+        .status(404)
+        .json({ message: "Book not found in availableBooks collection" });
+    }
+
+    res.status(200).json({
+      message: "Book removed successfully and availability updated",
+      updatedBook,
+    });
+  } catch (error) {
+    console.error("Error removing book:", error);
+    res.status(500).json({ message: "Failed to delete book" });
+  }
+});
+
 app.post("/availableBooks", async (req, res) => {
   try {
-    const { bookTitle, Year, Regulation, department, semester, contact } =
-      req.body;
-
-    // Check if the book with the same title, year, regulation, department, semester, and contact exists
-    const existingBook = await AvailableBook.findOne({
+    const {
       bookTitle,
       Year,
       Regulation,
       department,
       semester,
-      contact, // Important: Search by both book details and contact
-    });
+      contact,
+      userId,
+    } = req.body;
 
-    if (existingBook) {
-      // If found, return a message that the book details are already added for this contact
-      return res
-        .status(409)
-        .send("You have already added the book details for this contact.");
+    console.log("Received User ID:", userId);
+
+    // Find the user in the seniordata collection by userId
+    const user = await seniorCollection.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    // If not found, add a new entry for the book (even if the book details are the same, but contact is different)
+    // Check if the book already exists in AvailableBook collection
+    // const existingBook = await AvailableBook.findOne({
+    //   bookTitle,
+    //   Year,
+    //   Regulation,
+    //   department,
+    //   semester,
+    //   contact,
+    // });
+
+    // if (existingBook) {
+    //   return res
+    //     .status(409)
+    //     .send("You have already added the book details for this contact.");
+    // }
+
+    // Create a new entry in the AvailableBook collection
     const newBook = new AvailableBook({
       bookTitle,
       Year,
@@ -152,14 +406,111 @@ app.post("/availableBooks", async (req, res) => {
       department,
       semester,
       contact,
-      // isAvailable: true, // Assuming the book is available
+      userId,
+      isAvailable: true,
     });
+    await newBook.save();
 
-    await newBook.save(); // Save the new book with a different contact number
+    // Create a plain object to push into the books array
+    const seniorBook = {
+      bookTitle,
+      Year,
+      Regulation,
+      sem: semester,
+      dep: department,
+      contact,
+      userId,
+    };
+
+    // Add the book details to the user's books array
+    user.books.push(seniorBook);
+    await user.save();
+
+    console.log("Book successfully added to user's list:", seniorBook);
+
     res.status(201).send("Book added as available.");
   } catch (error) {
     console.error("Error during book availability insertion:", error);
     res.status(500).send("Error saving book availability.");
+  }
+});
+
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1]; // Get token from 'Bearer <token>'
+
+  if (!token) {
+    return res
+      .status(401)
+      .json({ message: "Token not found, authorization denied" });
+  }
+
+  try {
+    // Verify the token
+    const decoded = jwt.verify(token, SECRET_KEY);
+    console.log("Decoded User ID:", decoded.userId);
+    req.userId = decoded.userId; // Add userId to request object
+    console.log("...........", req.userId);
+    next(); // Proceed to the next middleware or route handler
+  } catch (error) {
+    return res.status(403).json({ message: "Token is not valid" });
+  }
+};
+
+// FOR SENIOR
+app.get("/user-details", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.userId; // Retrieved from token
+    console.log("Fetching details for User ID:", userId);
+
+    // Fetch the user's details from the database
+    const user = await seniorCollection.findOne({ _id: userId });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Respond with user details
+    res.status(200).json({
+      message: "User details retrieved successfully",
+      user: {
+        mailId: user.mailId,
+        name: user.name,
+        books: user.books, // Example: Books associated with the user
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+//FOR JUNIOR
+
+app.get("/junior-details", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.userId; // Retrieved from token
+    console.log("Fetching details for User ID:", userId);
+
+    // Fetch the user's details from the database
+    const user = await juniorCollection.findOne({ _id: userId });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Respond with user details
+    res.status(200).json({
+      message: "User details retrieved successfully",
+      user: {
+        mailId: user.mailId,
+        name: user.name,
+        books: user.books, // Example: Books associated with the user
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -1931,63 +2282,63 @@ const insertInitialData = async () => {
 
       // Semester I
       {
-        bookTitle: "Professional English - I",
+        bookTitle: "HS3152 Professional English - I",
         Year: "I Year",
         Regulation: "2021",
         department: "CSE",
         semester: "I sem",
       },
       {
-        bookTitle: "Matrices and Calculus",
+        bookTitle: "MA3151 Matrices and Calculus",
         Year: "I Year",
         Regulation: "2021",
         department: "CSE",
         semester: "I sem",
       },
       {
-        bookTitle: "Engineering Physics",
+        bookTitle: "PH3151 Engineering Physics",
         Year: "I Year",
         Regulation: "2021",
         department: "CSE",
         semester: "I sem",
       },
       {
-        bookTitle: "Engineering Chemistry",
+        bookTitle: "CY3151 Engineering Chemistry",
         Year: "I Year",
         Regulation: "2021",
         department: "CSE",
         semester: "I sem",
       },
       {
-        bookTitle: "Problem Solving and Python Programming",
+        bookTitle: "GE3151 Problem Solving and Python Programming",
         Year: "I Year",
         Regulation: "2021",
         department: "CSE",
         semester: "I sem",
       },
       {
-        bookTitle: "Heritage of Tamils",
+        bookTitle: "GE3152 தமிழர் மரபு / Heritage of Tamils",
         Year: "I Year",
         Regulation: "2021",
         department: "CSE",
         semester: "I sem",
       },
       {
-        bookTitle: "Problem Solving and Python Programming Laboratory",
+        bookTitle: " GE3171 Problem Solving and Python Programming Laboratory",
         Year: "I Year",
         Regulation: "2021",
         department: "CSE",
         semester: "I sem",
       },
       {
-        bookTitle: "Physics and Chemistry Laboratory",
+        bookTitle: "BS3171 Physics and Chemistry Laboratory",
         Year: "I Year",
         Regulation: "2021",
         department: "CSE",
         semester: "I sem",
       },
       {
-        bookTitle: "English Laboratory",
+        bookTitle: ". GE3172 English Laboratory",
         Year: "I Year",
         Regulation: "2021",
         department: "CSE",
@@ -1996,70 +2347,70 @@ const insertInitialData = async () => {
 
       // Semester II
       {
-        bookTitle: "Professional English - II",
+        bookTitle: " HS3252 Professional English - II",
         Year: "I Year",
         Regulation: "2021",
         department: "CSE",
         semester: "II sem",
       },
       {
-        bookTitle: "Statistics and Numerical Methods",
+        bookTitle: "MA3251 Statistics and Numerical Methods",
         Year: "I Year",
         Regulation: "2021",
         department: "CSE",
         semester: "II sem",
       },
       {
-        bookTitle: "Physics for Information Science",
+        bookTitle: " PH3256 Physics for Information Science",
         Year: "I Year",
         Regulation: "2021",
         department: "CSE",
         semester: "II sem",
       },
       {
-        bookTitle: "Basic Electrical and Electronics Engineering",
+        bookTitle: "BE3251 Basic Electrical and Electronics Engineering",
         Year: "I Year",
         Regulation: "2021",
         department: "CSE",
         semester: "II sem",
       },
       {
-        bookTitle: "Engineering Graphics",
+        bookTitle: " GE3251 Engineering Graphics",
         Year: "I Year",
         Regulation: "2021",
         department: "CSE",
         semester: "II sem",
       },
       {
-        bookTitle: "Programming in C",
+        bookTitle: "CS3251 Programming in C",
         Year: "I Year",
         Regulation: "2021",
         department: "CSE",
         semester: "II sem",
       },
       {
-        bookTitle: "Tamils and Technology",
+        bookTitle: "GE3252 Tamils and Technology",
         Year: "I Year",
         Regulation: "2021",
         department: "CSE",
         semester: "II sem",
       },
       {
-        bookTitle: "Engineering Practices Laboratory",
+        bookTitle: "GE3271 Engineering Practices Laboratory",
         Year: "I Year",
         Regulation: "2021",
         department: "CSE",
         semester: "II sem",
       },
       {
-        bookTitle: "Programming in C Laboratory",
+        bookTitle: "CS3271 Programming in C Laboratory",
         Year: "I Year",
         Regulation: "2021",
         department: "CSE",
         semester: "II sem",
       },
       {
-        bookTitle: "Communication Laboratory / Foreign Language",
+        bookTitle: "GE3272 Communication Laboratory / Foreign Language",
         Year: "I Year",
         Regulation: "2021",
         department: "CSE",
@@ -2068,56 +2419,56 @@ const insertInitialData = async () => {
 
       // Semester III
       {
-        bookTitle: "Discrete Mathematics",
+        bookTitle: "MA3354 Discrete Mathematics",
         Year: "II Year",
         Regulation: "2021",
         department: "CSE",
         semester: "III sem",
       },
       {
-        bookTitle: "Digital Principles and Computer Organization",
+        bookTitle: "CS3351 Digital Principles and Computer Organization",
         Year: "II Year",
         Regulation: "2021",
         department: "CSE",
         semester: "III sem",
       },
       {
-        bookTitle: "Foundations of Data Science",
+        bookTitle: "CS3352 Foundations of Data Science",
         Year: "II Year",
         Regulation: "2021",
         department: "CSE",
         semester: "III sem",
       },
       {
-        bookTitle: "Data Structures",
+        bookTitle: " CS3301 Data Structures",
         Year: "II Year",
         Regulation: "2021",
         department: "CSE",
         semester: "III sem",
       },
       {
-        bookTitle: "Object Oriented Programming",
+        bookTitle: "CS3391 Object Oriented Programming",
         Year: "II Year",
         Regulation: "2021",
         department: "CSE",
         semester: "III sem",
       },
       {
-        bookTitle: "Data Structures Laboratory",
+        bookTitle: "CS3311 Data Structures Laboratory",
         Year: "II Year",
         Regulation: "2021",
         department: "CSE",
         semester: "III sem",
       },
       {
-        bookTitle: "Object Oriented Programming Laboratory",
+        bookTitle: "CS3381 Object Oriented Programming Laboratory",
         Year: "II Year",
         Regulation: "2021",
         department: "CSE",
         semester: "III sem",
       },
       {
-        bookTitle: "Data Science Laboratory",
+        bookTitle: "CS3361 Data Science Laboratory",
         Year: "II Year",
         Regulation: "2021",
         department: "CSE",
@@ -2126,56 +2477,56 @@ const insertInitialData = async () => {
 
       // Semester IV
       {
-        bookTitle: "Theory of Computation",
+        bookTitle: "CS3452 Theory of Computation",
         Year: "II Year",
         Regulation: "2021",
         department: "CSE",
         semester: "IV sem",
       },
       {
-        bookTitle: "Artificial Intelligence and Machine Learning",
+        bookTitle: "CS3491 Artificial Intelligence and Machine Learning",
         Year: "II Year",
         Regulation: "2021",
         department: "CSE",
         semester: "IV sem",
       },
       {
-        bookTitle: "Database Management Systems",
+        bookTitle: "CS3492 Database Management Systems",
         Year: "II Year",
         Regulation: "2021",
         department: "CSE",
         semester: "IV sem",
       },
       {
-        bookTitle: "Algorithms",
+        bookTitle: "CS3401  Algorithms",
         Year: "II Year",
         Regulation: "2021",
         department: "CSE",
         semester: "IV sem",
       },
       {
-        bookTitle: "Introduction to Operating Systems",
+        bookTitle: "CS3451 Introduction to Operating Systems",
         Year: "II Year",
         Regulation: "2021",
         department: "CSE",
         semester: "IV sem",
       },
       {
-        bookTitle: "Environmental Sciences and Sustainability",
+        bookTitle: " GE3451 Environmental Sciences and Sustainability",
         Year: "II Year",
         Regulation: "2021",
         department: "CSE",
         semester: "IV sem",
       },
       {
-        bookTitle: "Operating Systems Laboratory",
+        bookTitle: "CS3461  Operating Systems Laboratory",
         Year: "II Year",
         Regulation: "2021",
         department: "CSE",
         semester: "IV sem",
       },
       {
-        bookTitle: "Database Management Systems Laboratory",
+        bookTitle: "CS3481 Database Management Systems Laboratory",
         Year: "II Year",
         Regulation: "2021",
         department: "CSE",
@@ -2184,28 +2535,28 @@ const insertInitialData = async () => {
 
       // Semester V
       {
-        bookTitle: "Computer Networks",
+        bookTitle: "CS3591 Computer Networks",
         Year: "III Year",
         Regulation: "2021",
         department: "CSE",
         semester: "V sem",
       },
       {
-        bookTitle: "Compiler Design",
+        bookTitle: "CS3501 Compiler Design",
         Year: "III Year",
         Regulation: "2021",
         department: "CSE",
         semester: "V sem",
       },
       {
-        bookTitle: "Cryptography and Cyber Security",
+        bookTitle: "CB3491 Cryptography and Cyber Security",
         Year: "III Year",
         Regulation: "2021",
         department: "CSE",
         semester: "V sem",
       },
       {
-        bookTitle: "Distributed Computing",
+        bookTitle: "CS3551 Distributed Computing",
         Year: "III Year",
         Regulation: "2021",
         department: "CSE",
@@ -2214,14 +2565,14 @@ const insertInitialData = async () => {
 
       // Semester VI
       {
-        bookTitle: "Object Oriented Software Engineering",
+        bookTitle: "CCS356 Object Oriented Software Engineering",
         Year: "III Year",
         Regulation: "2021",
         department: "CSE",
         semester: "VI sem",
       },
       {
-        bookTitle: "Embedded Systems and IoT",
+        bookTitle: "CS3691 Embedded Systems and IoT",
         Year: "III Year",
         Regulation: "2021",
         department: "CSE",
@@ -2265,7 +2616,7 @@ const insertInitialData = async () => {
 
       // Semester VII
       {
-        bookTitle: "Human Values and Ethics",
+        bookTitle: "GE3791 Human Values and Ethics",
         Year: "IV Year",
         Regulation: "2021",
         department: "CSE",
@@ -4172,7 +4523,7 @@ const insertInitialData = async () => {
         await collection.create(book); // Correct method to insert a single document
         console.log(`Inserted: ${book.bookTitle}`);
       } else {
-        console.log(`Already exists: ${book.bookTitle}`);
+        // console.log(`Already exists: ${book.bookTitle}`);
       }
     }
   } catch (error) {

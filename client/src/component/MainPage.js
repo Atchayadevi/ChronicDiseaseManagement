@@ -4,11 +4,11 @@ function MainPage() {
   const navigate = useNavigate();
 
   const showSeniorSide = () => {
-    navigate("/listavailablebooks");
+    navigate("/senior_registration");
   };
 
   const showJuniorSide = () => {
-    navigate("/bookavailable");
+    navigate("/junior_registration");
   };
   return (
     <>
@@ -20,7 +20,7 @@ function MainPage() {
             className="h-16 w-16 mr-4" // Adjust the size as needed
           />
           <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-4xl text-white  p-6 text-center">
-            Jacsice BookBuddy Network
+            Jacsice BookNest
           </h1>
         </div>
 
