@@ -102,7 +102,7 @@ const JuniorRegistration = () => {
                 className="block text-gray-700 text-sm font-bold mb-2"
                 htmlFor="collegeId"
               >
-                College ID/Company name(if alumni)
+                College ID No/Company name(if alumni)
               </label>
               <input
                 type="text"
