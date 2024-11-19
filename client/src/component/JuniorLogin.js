@@ -39,6 +39,7 @@ const JuniorLogin = () => {
       }, 1000);
     } catch (err) {
       setError(err.response?.data?.message || "something went wrong");
+      setError(err.response?.data?.message || "Mail not registered");
       setMessage("");
     }
   };
