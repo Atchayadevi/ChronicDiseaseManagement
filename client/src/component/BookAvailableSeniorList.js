@@ -121,15 +121,14 @@ function BookAvailableSeniorList() {
             )}
           </div>
 
-          {/* Center: Logo and Title */}
-          <div className="flex items-center justify-center space-x-4">
+          <div className="flex items-center justify-center p-4 bg-gradient-to-r bg-[#25154d]">
             <img
-              src="/logo.jpeg"
+              src="/logo.jpeg" // Assuming the logo is placed in the public/images directory
               alt="BookBuddy Logo"
-              className="h-16 w-16 md:h-20 md:w-20 rounded-full"
+              className="h-16 w-16 mr-4 md:h-20 md:w-20 rounded-full"
             />
-            <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-4xl text-white font-bold p-2 text-center">
-              Jacsice BookNest
+            <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-4xl text-white p-6 text-center">
+              JACSICE BookNest
             </h1>
           </div>
 
@@ -148,7 +147,7 @@ function BookAvailableSeniorList() {
         </div>
       </div>
 
-      <div className="space-y-4 p-6 bg-gray-300 rounded m-2 mx-auto w-full lg:w-2/3">
+      <div className="space-y-4 p-6 bg-violet-600 rounded m-2 mx-auto w-full lg:w-2/3">
         <div className="flex flex-col lg:flex-row lg:items-center space-y-2 lg:space-y-0 lg:space-x-4 w-full ">
           <label className="text-2xl font-bold text-black lg:w-1/4">
             Filter by book name
@@ -292,7 +291,7 @@ function BookAvailableSeniorList() {
                     </td>
                     <td className="px-4 py-2 text-1xl whitespace-nowrap">
                       <a
-                        className={`flex items-center justify-center rounded p-2 space-x-3 ${
+                        className={`flex items-center justify-center rounded p-2  space-x-3 ${
                           book.isAvailable
                             ? "bg-green-300 cursor-pointer" // Active styling
                             : "bg-gray-300 cursor-not-allowed" // Disabled styling
@@ -335,7 +334,7 @@ function BookAvailableSeniorList() {
       <div className="flex justify-center items-center">
         <button
           onClick={fetchOtherBooks}
-          className="bg-blue-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300"
+          className="bg-violet-600 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300"
         >
           {loadingOther ? "Loading..." : "Other Available books here"}
         </button>

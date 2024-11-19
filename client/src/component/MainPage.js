@@ -13,18 +13,18 @@ function MainPage() {
   return (
     <>
       <div>
-        <div className="flex items-center justify-center p-2 bg-gradient-to-r bg-[#25154d]">
+        <div className="flex items-center justify-center p-4 bg-gradient-to-r bg-[#25154d]">
           <img
-            src="/logo.jpeg" 
+            src="/logo.jpeg" // Assuming the logo is placed in the public/images directory
             alt="BookBuddy Logo"
-            className="h-16 w-16 mr-4" 
+            className="h-16 w-16 mr-4 md:h-20 md:w-20 rounded-full"
           />
-          <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-4xl text-white  p-6 text-center">
-            Jacsice BookNest
+          <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-4xl text-white p-6 text-center">
+            JACSICE BookNest
           </h1>
         </div>
 
-        <h3 className="text-center text-2xl md:text-3xl lg:text-4xl xl:text-3xl text-sky-950 p-6 font-bold ">
+        <h3 className=" text-center text-2xl md:text-3xl lg:text-4xl xl:text-3xl text-sky-950 p-6 font-bold ">
           Easily find and share books between seniors and juniors.
         </h3>
         <h1 className=" p-10 sm:p-28 lg:p-28 font-serif leading-loose md:p-20 text-center bg-pink-950 text-white text-3xl">

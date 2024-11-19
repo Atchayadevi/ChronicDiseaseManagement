@@ -47,10 +47,10 @@ const AddotherBooks = () => {
         <img
           src="/logo.jpeg" // Assuming the logo is placed in the public/images directory
           alt="BookBuddy Logo"
-          className="h-16 w-16 mr-4"
+          className="h-16 w-16 mr-4 md:h-20 md:w-20 rounded-full"
         />
         <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-4xl text-white p-6 text-center">
-          Jacsice BookNest
+          JACSICE BookNest
         </h1>
       </div>
       <div className=" flex items-center justify-center bg-gray-100 p-4">

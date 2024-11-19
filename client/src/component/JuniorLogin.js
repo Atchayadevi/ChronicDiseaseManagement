@@ -49,13 +49,13 @@ const JuniorLogin = () => {
         <img
           src="/logo.jpeg" // Assuming the logo is placed in the public/images directory
           alt="BookBuddy Logo"
-          className="h-16 w-16 mr-4"
+          className="h-16 w-16 mr-4 md:h-20 md:w-20 rounded-full"
         />
         <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-4xl text-white p-6 text-center">
-          Jacsice BookNest
+          JACSICE BookNest
         </h1>
       </div>
-      <div className="min-h-96 flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen bg-violet-600 flex items-center justify-center ">
         <div className="w-full max-w-md bg-white shadow-md rounded-lg p-8">
           <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
           <form onSubmit={handleSubmit}>
@@ -79,7 +79,7 @@ const JuniorLogin = () => {
             <div className="flex items-center justify-between">
               <button
                 type="submit"
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 w-full"
+                className="bg-violet-600 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 w-full"
               >
                 Login
               </button>
@@ -89,7 +89,7 @@ const JuniorLogin = () => {
             <h1 className=" mt-3 flex items-center justify-center">
               New user?
               <button
-                className="bg-green-900  hover:bg-green-800 text-white font-bold py-0 px-1 rounded"
+                className="bg-violet-600  hover:bg-blue-600 text-white font-bold py-0 px-1 rounded"
                 onClick={(e) => {
                   e.preventDefault();
                   navigate("/junior_registration");

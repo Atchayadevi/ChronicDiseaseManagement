@@ -15,7 +15,7 @@ export default function SeniorSite() {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/books/${seniorId}/${bookId}`,
+        `https://books-serverside.onrender.com/books/${seniorId}/${bookId}`,
         {
           method: "DELETE",
         }
@@ -68,17 +68,16 @@ export default function SeniorSite() {
           </div>
 
           {/* Center: Logo and Title */}
-          <div className="flex items-center justify-center space-x-4">
+          <div className="flex items-center justify-center p-4 bg-gradient-to-r bg-[#25154d]">
             <img
-              src="/logo.jpeg"
+              src="/logo.jpeg" // Assuming the logo is placed in the public/images directory
               alt="BookBuddy Logo"
-              className="h-16 w-16 md:h-20 md:w-20 rounded-full"
+              className="h-16 w-16 mr-4 md:h-20 md:w-20 rounded-full"
             />
-            <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-4xl text-white font-bold p-2 text-center">
-              Jacsice BookBuddy Network
+            <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-4xl text-white p-6 text-center">
+              JACSICE BookNest
             </h1>
           </div>
-
           {/* Right side: Button */}
           <div className="flex items-center justify-center">
             <button
@@ -86,7 +85,7 @@ export default function SeniorSite() {
                 e.preventDefault();
                 navigate("/mainpage");
               }}
-              className="bg-white text-[#25154d] py-2 px-4 rounded-lg font-medium hover:bg-lime-500 hover:text-white transition duration-200"
+              className="bg-violet-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-600 hover:text-white transition duration-200"
             >
               Log out
             </button>
@@ -141,7 +140,7 @@ export default function SeniorSite() {
                       e.preventDefault();
                       handleDelete(user.userId, book._id);
                     }}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
+                    className="px-4 py-2 bg-violet-600 text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
                   >
                     Remove Availability
                   </button>

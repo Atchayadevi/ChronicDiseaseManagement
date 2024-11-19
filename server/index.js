@@ -10,7 +10,7 @@ const app = express();
 const port = 8000;
 const cors = require("cors");
 // const cors = require("cors");
-app.use(cors({ origin: "https://books-client-iaft.onrender.com" })); // Allow only your frontend  // https://books-client-iaft.onrender.com
+// app.use(cors({ origin: "https://books-client-iaft.onrender.com" })); // Allow only your frontend  // https://books-client-iaft.onrender.com
 app.use(cors());
 
 app.use(express.json());
@@ -175,7 +175,7 @@ app.post("/seniordetails", async (req, res) => {
   try {
     // Check if any of the provided identifiers (mailId, collegeId, or contact) already exist in the database
     const existingUser = await seniorCollection.findOne({
-      $or: [{ mailId: mailId }, { collegeId: collegeId }, { contact: contact }],
+      $or: [{ mailId: mailId }],
     });
 
     if (existingUser) {
@@ -243,9 +243,9 @@ app.post("/juniordetails", async (req, res) => {
   try {
     const existingUser = await juniorCollection.findOne({ mailId });
 
-    if (!existingUser) {
-      return res.status(400).json({ message: "Email not registered" });
-    }
+    // if (!existingUser) {
+    //   return res.status(400).json({ message: "Email not registered" });
+    // }
     console.log("existing user", existingUser);
     const newUser = new juniorCollection({ name, mailId, collegeId, contact });
     await newUser.save();
