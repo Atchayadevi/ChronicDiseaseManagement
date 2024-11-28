@@ -10,7 +10,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     // if (username === "JACSICE" && password === "JACSICE") {
-    //   alert("Login successful");
+      alert("Login successful");
       setTimeout(() => {
         navigate("/mainpage");
       }, 1000);
