@@ -9,16 +9,16 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (username === "JACSICE" && password === "JACSICE") {
+    // if (username === "JACSICE" && password === "JACSICE") {
       alert("Login successful");
       setTimeout(() => {
         navigate("/mainpage");
       }, 1000);
-    } else {
-      alert("Wrong username and password");
-    }
-    setUsername("");
-    setPassword("");
+    // } else {
+    //   alert("Wrong username and password");
+    // }
+    // setUsername("");
+    // setPassword("");
   };
 
   return (
