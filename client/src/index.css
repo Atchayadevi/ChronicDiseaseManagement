@@ -1,3 +1,96 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --primary: 96 173 91; /* #8AD45B (Agrizy green) */
+  --primary-foreground: 255 255 255;
+
+  --secondary: 74 120 48; /* #4A7830 (Darker green) */
+  --secondary-foreground: 255 255 255;
+
+  --accent: 238 246 233; /* #EEF6E9 (Light green/background) */
+  --accent-foreground: 0 0 0;
+
+  --destructive: 239 68 68; /* Red */
+  --destructive-foreground: 255 255 255;
+
+  --background: 255 255 255;
+  --foreground: 0 0 0;
+
+  --muted: 240 240 240;
+  --muted-foreground: 115 115 115;
+
+  --card: 255 255 255;
+  --card-foreground: 0 0 0;
+
+  --border: 230 230 230;
+  --input: 230 230 230;
+
+  --ring: 96 173 91; /* #8AD45B */
+}
+
+.dark {
+  --primary: 96 173 91; /* #8AD45B */
+  --primary-foreground: 255 255 255;
+
+  --secondary: 107 155 77; /* #6B9B4D (Medium green) */
+  --secondary-foreground: 255 255 255;
+
+  --accent: 43 55 39; /* #2B3727 (Very dark green) */
+  --accent-foreground: 255 255 255;
+
+  --destructive: 248 114 114; /* Lighter red for dark mode */
+  --destructive-foreground: 255 255 255;
+
+  --background: 20 20 20;
+  --foreground: 255 255 255;
+
+  --muted: 40 40 40;
+  --muted-foreground: 160 160 160;
+
+  --card: 30 30 30;
+  --card-foreground: 255 255 255;
+
+  --border: 50 50 50;
+  --input: 50 50 50;
+
+  --ring: 96 173 91; /* #8AD45B */
+}
+
+@layer base {
+  body {
+    @apply font-sans bg-background text-foreground;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading;
+  }
+}
+
+@layer components {
+  .sidebar-item {
+    @apply flex items-center rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground;
+  }
+
+  .sidebar-item-active {
+    @apply bg-primary/10 text-primary font-medium hover:bg-primary/20;
+  }
+
+  .sidebar-item-inactive {
+    @apply text-foreground hover:bg-muted;
+  }
+
+  .toast-notification {
+    @apply rounded-md border bg-card text-card-foreground shadow-md;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+  }
+}

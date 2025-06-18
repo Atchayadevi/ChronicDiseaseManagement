@@ -3,13 +3,14 @@ import ListAvailableBooks from "./component/ListAvailableBooks";
 import BookAvailableSeniorList from "./component/BookAvailableSeniorList";
 import Login from "./component/Login";
 import MainPage from "./component/MainPage";
-import AddotherBooks from "./component/AddotherBooks";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import SeniorRegistration from "./component/SeniorRegistration";
 import JuniorRegistration from "./component/JuniorRegistration";
 import SeniorLogin from "./component/SeniorLogin";
 import JuniorLogin from "./component/JuniorLogin";
-import SeniorSite from "./sites.js/SeniorSite";
+import DietGuide from "./component/DietGuide";
+import Contact from "./component/Contact";
+import Prescriptions from "./component/Prescriptions";
 function App() {
   return (
     <Router>
@@ -22,8 +23,9 @@ function App() {
         <Route path="/juniorLogin" element={<JuniorLogin />} />
         <Route path="/listavailablebooks" element={<ListAvailableBooks />} />
         <Route path="/bookavailable" element={<BookAvailableSeniorList />} />
-        <Route path="/addotherbooks" element={<AddotherBooks />} />
-        <Route path="/seniorsite" element={<SeniorSite />} />
+        <Route path="/prescription" element={<Prescriptions/>}/>
+        <Route path="/diet_guide" element={<DietGuide/>}/>
+        <Route path="/contact" element={<Contact/>}/>
       </Routes>
     </Router>
   );
